@@ -142,4 +142,25 @@ def health_check():
             .unhealthy {{ color: #dc3545; font-weight: bold; }}
             ul {{ list-style-type: none; padding: 0; text-align: center; }}
             li {{ margin-bottom: 5px; }}
-            .back-link {{ display
+            .back-link {{ display: block; text-align: center; margin-top: 20px; color: #007bff; text-decoration: none; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Health Check Report</h1>
+            <p class="{'healthy' if overall_status_code == 200 else 'unhealthy'}">{overall_message}</p>
+            <ul>
+                {"".join([f"<li>{detail}</li>" for detail in details])}
+            </ul>
+            <a href="/" class="back-link">Back to Dashboard</a>
+        </div>
+    </body>
+    </html>
+    """), overall_status_code
+
+# --- Database Initialization (Important for Flask-SQLAlchemy) ---
+with app.app_context():
+    db.create_all()
+
+if __name__ == '__main__':
+    app.run(debug=True)
