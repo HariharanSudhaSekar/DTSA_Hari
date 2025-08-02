@@ -1,35 +1,15 @@
 #!/usr/bin/env python3
 
-<<<<<<< HEAD
-from flask import Flask, request
-
-app = Flask(__name__)
-
-@app.route("/")
-def main():
-    return '''
-    <form action="/echo_user_input" method="POST">
-        <input name="user_input">
-        <input type="submit" value="Submit!">
-    </form>
-    '''
-
-@app.route("/echo_user_input", methods=["POST"])
-def echo_input():
-    input_text = request.form.get("user_input", "")
-    return "You entered: " + input_text
-=======
 from flask import Flask, render_template_string
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
-import requests # Added for improved health check (though not strictly for app.py's main function here)
+import requests
 
 app = Flask(__name__)
 
 # Configure the database URI for the weather data
 base_dir = os.path.abspath(os.path.dirname(__file__))
-# Note: The database file is expected to be in the parent directory (project root)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(os.path.dirname(base_dir), 'Weather.sqlite3')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -37,11 +17,11 @@ db = SQLAlchemy(app)
 
 # Define the Weather database model (MUST BE IDENTICAL TO collect_weather_data.py)
 class Weather(db.Model):
-    __tablename__ = "weather_data" 
+    __tablename__ = "weather_data"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     entry_time = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     temperature_celsius = db.Column(db.Float, nullable=False)
-    
+
     def __repr__(self):
         return f"<Weather(Time: {self.entry_time}, Temp: {self.temperature_celsius}°C)>"
 
@@ -61,7 +41,7 @@ def index():
     average_temp = "N/A"
     if all_historical_temps:
         temperatures_list = [entry.temperature_celsius for entry in all_historical_temps]
-        if temperatures_list: # Ensure list is not empty
+        if temperatures_list:
             average_temp = round(sum(temperatures_list) / len(temperatures_list), 2)
         else:
             average_temp = "No data for average"
@@ -134,21 +114,10 @@ def health_check():
     db_status_code = 200
 
     try:
-        # Attempt a simple database query to check connectivity
         db.session.query(Weather).first()
     except Exception as e:
         db_status_message = f"Database: Inactive ({e})"
         db_status_code = 500
-
-    # You could add external API health checks here too:
-    # api_status_message = "External API: OK"
-    # api_status_code = 200
-    # try:
-    #     response = requests.get("https://api.open-meteo.com/v1/forecast?latitude=0&longitude=0&current_weather=true", timeout=5)
-    #     response.raise_for_status()
-    # except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, requests.exceptions.HTTPError) as e:
-    #     api_status_message = f"External API: Unreachable ({e})"
-    #     api_status_code = 500
 
     overall_status_code = 200
     overall_message = "Application Status: Healthy"
@@ -158,10 +127,6 @@ def health_check():
         overall_status_code = 500
         overall_message = "Application Status: Unhealthy"
     details.append(db_status_message)
-    # if api_status_code != 200:
-    #     overall_status_code = 500
-    #     overall_message = "Application Status: Unhealthy"
-    # details.append(api_status_message)
 
     return render_template_string(f"""
     <!DOCTYPE html>
@@ -177,28 +142,4 @@ def health_check():
             .unhealthy {{ color: #dc3545; font-weight: bold; }}
             ul {{ list-style-type: none; padding: 0; text-align: center; }}
             li {{ margin-bottom: 5px; }}
-            .back-link {{ display: block; text-align: center; margin-top: 20px; color: #007bff; text-decoration: none; }}
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>Health Check Report</h1>
-            <p class="{'healthy' if overall_status_code == 200 else 'unhealthy'}">{overall_message}</p>
-            <ul>
-                {"".join([f"<li>{detail}</li>" for detail in details])}
-            </ul>
-            <a href="/" class="back-link">Back to Dashboard</a>
-        </div>
-    </body>
-    </html>
-    """), overall_status_code
-
-# --- Database Initialization (Important for Flask-SQLAlchemy) ---
-# This ensures tables are created when the app starts if they don't exist
-with app.app_context():
-    db.create_all()
-
-if __name__ == '__main__':
-    # For local development, run with debug=True
-    app.run(debug=True)
->>>>>>> 9d3298a0fc4471010b3582b13b777fa2be732a12
+            .back-link {{ display
